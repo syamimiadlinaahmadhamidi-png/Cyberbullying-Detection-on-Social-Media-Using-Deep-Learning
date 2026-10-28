@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CyberShield</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#000;--s2:#16181c;--s3:#1d1f23;--border:#2f3336;
+  --blue:#1d9bf0;--blue-h:#1a8cd8;
+  --text:#e7e9ea;--muted:#71767b;--dim:#3e4144;
+  --red:#f4212e;--red-bg:rgba(244,33,46,.1);--red-border:rgba(244,33,46,.35);
+  --green:#00ba7c;--r:9999px;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15px;min-height:100vh;}
+
+/* ── Layout ── */
+.layout{display:flex;max-width:1280px;margin:0 auto;}
+
+/* ── Left Sidebar ── */
+.sidebar{width:275px;padding:0 12px;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;}
+.sidebar::-webkit-scrollbar{display:none;}
+.logo{padding:12px;margin:4px 0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:var(--r);cursor:pointer;transition:background .2s;}
+.logo:hover{background:rgba(231,233,234,.1);}
+.logo svg{width:28px;height:28px;fill:var(--text);}
+.nav-item{display:flex;align-items:center;gap:20px;padding:12px 16px;border-radius:var(--r);cursor:pointer;font-size:20px;font-weight:400;color:var(--text);transition:background .2s;margin-bottom:4px;user-select:none;}
+.nav-item:hover{background:rgba(231,233,234,.1);}
+.nav-item.active{font-weight:700;}
+.nav-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-post-side{background:var(--blue);color:#fff;border:none;border-radius:var(--r);padding:16px 32px;font-size:17px;font-weight:700;cursor:pointer;width:100%;margin-top:16px;transition:background .2s;font-family:inherit;}
+.btn-post-side:hover{background:var(--blue-h);}
+.sidebar-profile{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--r);cursor:pointer;margin-top:auto;margin-bottom:12px;transition:background .2s;}
+.sidebar-profile:hover{background:rgba(231,233,234,.1);}
+.sp-name{font-weight:700;font-size:15px;}
+.sp-handle{font-size:15px;color:var(--muted);}
+
+/* ── Main ── */
+.main{flex:1;border-left:1px solid var(--border);border-right:1px solid var(--border);min-height:100vh;max-width:600px;}
+
+/* ── Views (pages) ── */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ── Header ── */
+.main-header{position:sticky;top:0;z-index:100;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:53px;}
+.main-title{font-size:20px;font-weight:700;}
+.back-btn{width:34px;height:34px;border-radius:var(--r);border:none;background:transparent;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;margin-right:12px;}
+.back-btn:hover{background:rgba(231,233,234,.1);}
+.header-left{display:flex;align-items:center;}
+
+/* ── Tabs ── */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);}
+.tab{flex:1;text-align:center;padding:16px 0;font-weight:500;color:var(--muted);cursor:pointer;position:relative;font-size:15px;transition:background .2s;}
+.tab:hover{background:rgba(231,233,234,.08);}
+.tab.active{font-weight:700;color:var(--text);}
+.tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:56px;height:4px;background:var(--blue);border-radius:2px;}
+
+/* ── Compose ── */
+.compose{display:flex;gap:12px;padding:12px 16px 0;border-bottom:1px solid var(--border);}
+.compose-right{flex:1;}
+.compose-input{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:20px;font-family:inherit;line-height:1.5;resize:none;min-height:52px;}
+.compose-input::placeholder{color:var(--muted);}
+.compose-audience{display:inline-flex;align-items:center;gap:4px;color:var(--blue);font-size:14px;font-weight:700;border:1px solid rgba(29,155,240,.4);border-radius:var(--r);padding:4px 12px;cursor:pointer;margin-bottom:8px;transition:background .2s;}
+.compose-audience:hover{background:rgba(29,155,240,.1);}
+.cdivider{border:none;border-top:1px solid var(--border);margin:4px 0 8px;}
+.compose-bottom{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;}
+.compose-actions{display:flex;align-items:center;gap:4px;}
+.caction{width:36px;height:36px;border-radius:var(--r);border:none;background:transparent;color:var(--blue);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.caction:hover{background:rgba(29,155,240,.1);}
+.compose-right-row{display:flex;align-items:center;gap:12px;}
+.char-ring{width:26px;height:26px;}
+.char-ring svg{width:26px;height:26px;transform:rotate(-90deg);}
+.ring-track{fill:none;stroke:var(--border);stroke-width:2.5;}
+.ring-fill{fill:none;stroke:var(--blue);stroke-width:2.5;stroke-linecap:round;transition:stroke-dashoffset .2s,stroke .2s;}
+.dvider-v{width:1px;height:28px;background:var(--border);}
+.btn-post-c{background:var(--blue);color:#fff;border:none;border-radius:var(--r);padding:9px 18px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s,opacity .2s;display:flex;align-items:center;gap:8px;}
+.btn-post-c:hover:not(:disabled){background:var(--blue-h);}
+.btn-post-c:disabled{opacity:.5;cursor:not-allowed;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.btn-post-c.loading .spinner{display:block;}
+.btn-post-c.loading .blbl{display:none;}
+
+/* ── Post card ── */
+.post-wrap{border-bottom:1px solid var(--border);cursor:pointer;animation:fadeSlide .3s ease;}
+.post-wrap:hover{background:rgba(231,233,234,.03);}
+.post-inner{display:flex;gap:12px;padding:12px 16px;}
+.post-body-col{flex:1;min-width:0;}
+.post-header-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px;}
+.post-name{font-weight:700;font-size:15px;}
+.post-handle,.post-dot,.post-time{color:var(--muted);font-size:15px;}
+.post-more{margin-left:auto;color:var(--muted);font-size:18px;width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s;cursor:pointer;}
+.post-more:hover{background:rgba(29,155,240,.1);color:var(--blue);}
+.post-text{font-size:15px;color:var(--text);line-height:1.5;word-break:break-word;}
+.post-text.blurred{filter:blur(7px);user-select:none;pointer-events:none;}
+
+/* ── Blocked card ── */
+.blocked-card{margin-top:10px;border-radius:16px;border:1px solid var(--red-border);background:var(--red-bg);overflow:hidden;}
+.blocked-inner{padding:12px 14px;}
+.blocked-title{font-weight:700;font-size:14px;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.blocked-desc{color:#ff8f99;font-size:13px;line-height:1.5;}
+.blocked-meta{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;}
+.blocked-stat{font-size:12px;color:var(--muted);}
+.blocked-stat strong{color:var(--text);}
+.btn-reveal{margin-top:8px;background:transparent;border:1px solid var(--red-border);border-radius:var(--r);color:var(--red);font-size:13px;font-family:inherit;padding:5px 14px;cursor:pointer;transition:background .2s;}
+.btn-reveal:hover{background:rgba(244,33,46,.1);}
+
+/* ── Post actions ── */
+.post-actions{display:flex;align-items:center;margin-top:10px;gap:4px;max-width:420px;justify-content:space-between;}
+.paction{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;cursor:pointer;border:none;background:transparent;font-family:inherit;border-radius:var(--r);padding:6px 10px;transition:color .2s,background .2s;}
+.paction:hover{background:rgba(29,155,240,.1);color:var(--blue);}
+.paction.like:hover{background:rgba(249,24,128,.1);color:#f91880;}
+.paction.liked{color:#f91880;}
+.paction.disabled-action{opacity:.3;cursor:not-allowed;pointer-events:none;}
+.paction svg{width:18px;height:18px;}
+
+/* ── Avatar ── */
+.avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;}
+.av-you{background:rgba(29,155,240,.2);color:var(--blue);}
+.av-a{background:#273340;color:#7ec8e3;}
+.av-b{background:#2d2016;color:#ffd400;}
+.av-c{background:#2a1f2d;color:#c77dff;}
+.av-d{background:#2d1f1f;color:#ff6b6b;}
+.av-e{background:#1a2a1a;color:#00ba7c;}
+.av-f{background:#2a1a2a;color:#ff79c6;}
+
+/* ── Right Sidebar ── */
+.rsidebar{width:350px;padding:0 16px;flex-shrink:0;}
+.search-wrap{position:sticky;top:0;padding:6px 0 12px;background:var(--bg);z-index:10;}
+.search-box{background:var(--s2);border-radius:var(--r);display:flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid transparent;transition:border-color .2s,background .2s;}
+.search-box:focus-within{background:var(--bg);border-color:var(--blue);}
+.search-box svg{width:18px;height:18px;fill:var(--muted);flex-shrink:0;}
+.search-input{background:transparent;border:none;outline:none;color:var(--text);font-family:inherit;font-size:15px;flex:1;}
+.search-input::placeholder{color:var(--muted);}
+.widget{background:var(--s2);border-radius:16px;margin-bottom:16px;overflow:hidden;}
+.widget-title{font-size:20px;font-weight:800;padding:12px 16px;}
+.witem{padding:12px 16px;cursor:pointer;transition:background .2s;border-top:1px solid var(--border);}
+.witem:hover{background:rgba(231,233,234,.05);}
+.witem-cat{font-size:13px;color:var(--muted);}
+.witem-val{font-size:15px;font-weight:700;}
+.witem-sub{font-size:13px;color:var(--muted);}
+.follow-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border);}
+.follow-btn{border:1px solid var(--text);background:transparent;color:var(--text);border-radius:var(--r);padding:7px 16px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s;}
+.follow-btn:hover{background:var(--text);color:var(--bg);}
+.footer-links{font-size:13px;color:var(--muted);padding:4px 16px;line-height:1.9;}
+
+/* ── Full page views ── */
+.page-header{display:flex;align-items:center;padding:16px;border-bottom:1px solid var(--border);}
+.page-title{font-size:20px;font-weight:700;}
+.page-subtitle{font-size:15px;color:var(--muted);}
+.page-body{padding:20px 16px;}
+.big-icon{font-size:52px;margin-bottom:16px;}
+.page-h1{font-size:31px;font-weight:800;margin-bottom:8px;}
+.page-p{font-size:17px;color:var(--muted);line-height:1.6;max-width:400px;}
+.empty-page{padding:60px 32px;text-align:center;}
+
+/* ── Explore ── */
+.explore-search{padding:12px 16px;border-bottom:1px solid var(--border);}
+.explore-input-wrap{background:var(--s2);border-radius:var(--r);display:flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid transparent;}
+.explore-input-wrap:focus-within{background:var(--bg);border-color:var(--blue);}
+.explore-input{background:transparent;border:none;outline:none;color:var(--text);font-family:inherit;font-size:17px;flex:1;}
+.explore-input::placeholder{color:var(--muted);}
+.explore-tabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);}
+.explore-tab{flex-shrink:0;padding:16px 20px;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;position:relative;transition:background .2s;}
+.explore-tab:hover{background:rgba(231,233,234,.08);}
+.explore-tab.active{font-weight:700;color:var(--text);}
+.explore-tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:40px;height:4px;background:var(--blue);border-radius:2px;}
+.trend-card{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+.trend-card:hover{background:rgba(231,233,234,.05);}
+.trend-pill{display:inline-flex;align-items:center;background:rgba(29,155,240,.1);color:var(--blue);border-radius:var(--r);padding:6px 14px;font-size:15px;font-weight:700;margin-bottom:4px;}
+.trend-count{font-size:13px;color:var(--muted);}
+
+/* ── Notifications ── */
+.notif-item{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+.notif-item:hover{background:rgba(231,233,234,.04);}
+.notif-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.notif-blue{background:rgba(29,155,240,.15);}
+.notif-red{background:rgba(249,24,128,.15);}
+.notif-green{background:rgba(0,186,124,.15);}
+.notif-yellow{background:rgba(255,212,0,.15);}
+.notif-text{font-size:15px;line-height:1.5;}
+.notif-time{font-size:13px;color:var(--muted);margin-top:2px;}
+
+/* ── Messages ── */
+.msg-list-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+.msg-list-item:hover{background:rgba(231,233,234,.05);}
+.msg-preview{flex:1;min-width:0;}
+.msg-name-row{display:flex;justify-content:space-between;margin-bottom:2px;}
+.msg-name{font-weight:700;font-size:15px;}
+.msg-ts{font-size:13px;color:var(--muted);}
+.msg-preview-text{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.msg-unread{width:8px;height:8px;background:var(--blue);border-radius:50%;flex-shrink:0;}
+.new-msg-btn{position:absolute;bottom:80px;right:16px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);padding:14px 20px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;display:flex;align-items:center;gap:8px;}
+.new-msg-btn:hover{background:var(--blue-h);}
+.msg-container{position:relative;min-height:400px;}
+
+/* ── Profile ── */
+.profile-banner{height:130px;background:linear-gradient(135deg,#1a3a5c,#0d1f33);position:relative;}
+.profile-avatar-wrap{position:absolute;bottom:-24px;left:16px;border:4px solid var(--bg);border-radius:50%;}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:rgba(29,155,240,.3);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;}
+.edit-profile-btn{float:right;margin:12px 16px 0;border:1px solid var(--border);background:transparent;color:var(--text);border-radius:var(--r);padding:8px 18px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;}
+.edit-profile-btn:hover{background:rgba(231,233,234,.1);}
+.profile-info{padding:52px 16px 12px;}
+.profile-name{font-size:20px;font-weight:800;}
+.profile-handle{font-size:15px;color:var(--muted);margin-bottom:8px;}
+.profile-bio{font-size:15px;line-height:1.5;margin-bottom:8px;}
+.profile-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;}
+.profile-meta-item{display:flex;align-items:center;gap:4px;font-size:15px;color:var(--muted);}
+.profile-stats{display:flex;gap:20px;}
+.profile-stat{font-size:15px;}
+.profile-stat strong{font-weight:700;color:var(--text);}
+.profile-stat span{color:var(--muted);}
+.profile-tabs{display:flex;border-bottom:1px solid var(--border);}
+.ptab{flex:1;text-align:center;padding:16px 0;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;position:relative;transition:background .2s;}
+.ptab:hover{background:rgba(231,233,234,.08);}
+.ptab.active{font-weight:700;color:var(--text);}
+.ptab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:40px;height:4px;background:var(--blue);border-radius:2px;}
+
+/* ── Developer Panel (hidden — toggle with Ctrl+Shift+D) ── */
+.dev-panel{display:none;position:fixed;top:0;right:0;width:340px;height:100vh;background:#0a0c10;border-left:2px solid #1d9bf044;z-index:9999;overflow-y:auto;font-family:monospace;font-size:13px;}
+.dev-panel.open{display:flex;flex-direction:column;}
+.dev-header{padding:14px 16px;background:#111318;border-bottom:1px solid #2f3336;display:flex;justify-content:space-between;align-items:center;}
+.dev-title{font-size:14px;font-weight:700;color:#1d9bf0;letter-spacing:1px;text-transform:uppercase;}
+.dev-close{background:transparent;border:none;color:#71767b;font-size:18px;cursor:pointer;}
+.dev-section{padding:14px 16px;border-bottom:1px solid #1a1d22;}
+.dev-label{font-size:11px;color:#1d9bf0;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.dev-status{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.dev-dot{width:8px;height:8px;border-radius:50%;background:#3e4144;flex-shrink:0;}
+.dev-dot.on{background:#00ba7c;box-shadow:0 0 6px rgba(0,186,124,.5);}
+.dev-dot.err{background:#f4212e;}
+.dev-text{color:#e7e9ea;font-size:13px;}
+.dev-input{width:100%;background:#111318;border:1px solid #2f3336;border-radius:6px;padding:8px 10px;color:#e7e9ea;font-family:monospace;font-size:12px;outline:none;margin-bottom:8px;transition:border-color .2s;}
+.dev-input:focus{border-color:#1d9bf0;}
+.dev-btn{background:#1d9bf0;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:monospace;transition:background .2s;width:100%;margin-bottom:6px;}
+.dev-btn:hover{background:#1a8cd8;}
+.dev-btn.secondary{background:transparent;border:1px solid #2f3336;color:#e7e9ea;}
+.dev-btn.secondary:hover{background:rgba(231,233,234,.1);}
+.dev-stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1a1d22;}
+.dev-stat-key{color:#71767b;}
+.dev-stat-val{color:#e7e9ea;font-weight:700;}
+.dev-stat-val.green{color:#00ba7c;}
+.dev-stat-val.red{color:#f4212e;}
+.dev-stat-val.yellow{color:#ffd400;}
+.dev-log{font-size:11px;color:#71767b;max-height:180px;overflow-y:auto;line-height:1.7;}
+.dev-log .log-ok{color:#00ba7c;}
+.dev-log .log-err{color:#f4212e;}
+.dev-log .log-warn{color:#ffd400;}
+.dev-log .log-info{color:#1d9bf0;}
+.dev-hint{font-size:11px;color:#3e4144;text-align:center;padding:8px;margin-top:auto;}
+
+/* ── Dev toggle hint (tiny, bottom-left) ── */
+.dev-toggle-hint{position:fixed;bottom:12px;left:12px;font-size:10px;color:#3e4144;font-family:monospace;z-index:100;pointer-events:none;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--blue);color:#fff;border-radius:var(--r);padding:12px 24px;font-size:15px;font-weight:500;box-shadow:0 4px 24px rgba(29,155,240,.4);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:9998;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+@media(max-width:1100px){.rsidebar{display:none;}}
+@media(max-width:700px){
+  .sidebar{width:72px;}
+  .nav-label,.sp-info,.sp-dots{display:none;}
+  .btn-post-side{width:48px;height:48px;padding:0;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;}
+  .dev-panel{width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ═══ LEFT SIDEBAR ═══ -->
+  <div class="sidebar">
+    <div class="logo" onclick="showView('home')">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+    <nav>
+      <div class="nav-item active" id="nav-home" onclick="showView('home')">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M22.46 7.57L12.357 2.115c-.223-.12-.49-.12-.713 0L1.543 7.57c-.364.197-.5.652-.303 1.016.135.25.394.393.66.393.12 0 .243-.03.356-.09l.815-.44L4.7 19.963c.214 1.215 1.308 2.062 2.658 2.062h9.282c1.352 0 2.445-.848 2.662-2.088l1.626-11.49.818.442c.364.193.82.06 1.016-.304.196-.363.06-.818-.302-1.015zm-4.48 12.184c-.08.45-.513.79-1.04.79H7.357c-.527 0-.96-.34-1.037-.754L4.652 8.62l7.348-3.97 7.35 3.97-1.38 11.133z"/></svg></div>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item" id="nav-explore" onclick="showView('explore')">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.814 5.272l4.521 4.521-.707.707-4.521-4.521c-1.457 1.132-3.286 1.814-5.272 1.814-4.695 0-8.5-3.806-8.5-8.5z"/></svg></div>
+        <span class="nav-label">Explore</span>
+      </div>
+      <div class="nav-item" id="nav-notifications" onclick="showView('notifications')">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19.993 9.042C19.48 5.017 16.054 2 11.996 2s-7.49 3.021-7.993 7.051L2.622 17h4.215c.338 1.486 1.411 2.717 2.888 3.276.004.048.004.096.004.144C9.729 21.153 10.818 22 12 22s2.271-.847 2.271-1.58v-.144c1.477-.559 2.55-1.79 2.888-3.276h4.215l-1.381-7.958z"/></svg></div>
+        <span class="nav-label">Notifications</span>
+      </div>
+      <div class="nav-item" id="nav-messages" onclick="showView('messages')">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5V17c0 1.381-1.119 2.5-2.5 2.5H9.049l-4.65 2.97c-.765.49-1.401.198-1.401-.74V5.5zm6-1c-.276 0-.5.224-.5.5s.224.5.5.5h8c.276 0 .5-.224.5-.5s-.224-.5-.5-.5h-8zm-.5 5.5c0-.276.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5h-8c-.276 0-.5-.224-.5-.5zm0 4c0-.276.224-.5.5-.5h5c.276 0 .5.224.5.5s-.224.5-.5.5h-5c-.276 0-.5-.224-.5-.5z"/></svg></div>
+        <span class="nav-label">Messages</span>
+      </div>
+      <div class="nav-item" id="nav-profile" onclick="showView('profile')">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M5.651 19h12.698c-.337-1.8-1.023-3.21-1.945-4.19C15.318 13.65 13.838 13 12 13s-3.317.65-4.404 1.81c-.922.98-1.608 2.39-1.945 4.19zm.486-5.56C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46zM12 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM8 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4z"/></svg></div>
+        <span class="nav-label">Profile</span>
+      </div>
+    </nav>
+    <button class="btn-post-side" onclick="showView('home');setTimeout(()=>document.getElementById('ci').focus(),100)">Post</button>
+    <div class="sidebar-profile" onclick="showView('profile')">
+      <div class="avatar av-you">SA</div>
+      <div class="sp-info">
+        <div class="sp-name">Syamimi Adlina</div>
+        <div class="sp-handle">@syamimiadlina</div>
+      </div>
+      <div class="sp-dots">···</div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN COLUMN ═══ -->
+  <div class="main">
+
+    <!-- ── HOME ── -->
+    <div class="view active" id="view-home">
+      <div class="main-header">
+        <div class="main-title">Home</div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab active" id="tab-foryou" onclick="switchFeedTab('foryou')">For you</div>
+        <div class="tab" id="tab-following" onclick="switchFeedTab('following')">Following</div>
+      </div>
+
+      <!-- For You feed -->
+      <div id="feed-foryou">
+        <div class="compose" id="compose-foryou">
+          <div class="avatar av-you">SA</div>
+          <div class="compose-right">
+            <textarea class="compose-input" id="ci" placeholder="What is happening?!" rows="2" maxlength="280" oninput="onCompose()"></textarea>
+            <div class="compose-audience">🌐 Everyone ▾</div>
+            <hr class="cdivider"/>
+            <div class="compose-bottom">
+              <div class="compose-actions">
+                <button class="caction" onclick="showToast('Image upload coming soon')">🖼</button>
+                <button class="caction" style="font-size:13px;font-weight:700;" onclick="showToast('GIF coming soon')">GIF</button>
+                <button class="caction" onclick="showToast('Poll coming soon')">📊</button>
+                <button class="caction" onclick="showToast('Emoji picker coming soon')">😊</button>
+              </div>
+              <div class="compose-right-row">
+                <div class="char-ring">
+                  <svg viewBox="0 0 26 26">
+                    <circle class="ring-track" cx="13" cy="13" r="10"/>
+                    <circle class="ring-fill" id="rc" cx="13" cy="13" r="10" stroke-dasharray="62.83" stroke-dashoffset="62.83"/>
+                  </svg>
+                </div>
+                <div class="dvider-v"></div>
+                <button class="btn-post-c" id="pb" disabled onclick="submitPost()">
+                  <span class="blbl">Post</span>
+                  <div class="spinner"></div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="foryou-posts"></div>
+      </div>
+
+      <!-- Following feed -->
+      <div id="feed-following" style="display:none;">
+        <div class="compose">
+          <div class="avatar av-you">SA</div>
+          <div class="compose-right">
+            <textarea class="compose-input" placeholder="Share something with people you follow…" rows="2" maxlength="280" oninput="onComposeFollowing(this)" id="ci-following"></textarea>
+            <hr class="cdivider" style="margin-top:8px;"/>
+            <div class="compose-bottom">
+              <div class="compose-actions">
+                <button class="caction" onclick="showToast('Image upload coming soon')">🖼</button>
+              </div>
+              <div class="compose-right-row">
+                <button class="btn-post-c" id="pb-following" disabled onclick="submitFollowingPost()" style="padding:9px 16px;font-size:14px;">Post</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="following-posts"></div>
+      </div>
+    </div>
+
+    <!-- ── EXPLORE ── -->
+    <div class="view" id="view-explore">
+      <div class="main-header"><div class="main-title">Explore</div></div>
+      <div class="explore-search">
+        <div class="explore-input-wrap">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#71767b"><path d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.814 5.272l4.521 4.521-.707.707-4.521-4.521c-1.457 1.132-3.286 1.814-5.272 1.814-4.695 0-8.5-3.806-8.5-8.5z"/></svg>
+          <input class="explore-input" id="exploreSearch" placeholder="Search" oninput="filterTrends(this.value)"/>
+        </div>
+      </div>
+      <div class="explore-tabs">
+        <div class="explore-tab active" onclick="setExploreTab(this,'trending')">Trending</div>
+        <div class="explore-tab" onclick="setExploreTab(this,'news')">News</div>
+        <div class="explore-tab" onclick="setExploreTab(this,'sports')">Sports</div>
+        <div class="explore-tab" onclick="setExploreTab(this,'entertainment')">Entertainment</div>
+      </div>
+      <div id="trends-list"></div>
+    </div>
+
+    <!-- ── NOTIFICATIONS ── -->
+    <div class="view" id="view-notifications">
+      <div class="main-header"><div class="main-title">Notifications</div></div>
+      <div class="tab-bar">
+        <div class="tab active">All</div>
+        <div class="tab">Verified</div>
+        <div class="tab">Mentions</div>
+      </div>
+      <div id="notif-list"></div>
+    </div>
+
+    <!-- ── MESSAGES ── -->
+    <div class="view" id="view-messages">
+      <div class="main-header"><div class="main-title">Messages</div></div>
+      <div class="msg-container">
+        <div id="msg-list"></div>
+        <button class="new-msg-btn" onclick="showToast('New message composer coming soon!')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M2.988 21.128l2.56-6.297 3.737 3.737-6.297 2.56zM6.634 13.12L17.422 2.333l4.245 4.245L10.879 17.365l-4.245-4.245z"/></svg>
+          New message
+        </button>
+      </div>
+    </div>
+
+    <!-- ── PROFILE ── -->
+    <div class="view" id="view-profile">
+      <div class="main-header">
+        <div class="header-left">
+          <div>
+            <div class="main-title">Syamimi Adlina</div>
+            <div style="font-size:13px;color:var(--muted);" id="profile-post-count">0 posts</div>
+          </div>
+        </div>
+      </div>
+      <div class="profile-banner">
+        <div class="profile-avatar-wrap"><div class="profile-avatar">SA</div></div>
+      </div>
+      <div style="text-align:right;padding:12px 16px 0;">
+        <button class="edit-profile-btn" onclick="showToast('Profile editing coming soon!')">Edit profile</button>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">Syamimi Adlina</div>
+        <div class="profile-handle">@syamimiadlina</div>
+        <div class="profile-bio">Final-year student · Information Systems (Intelligent Systems Engineering) · UiTM 🎓</div>
+        <div class="profile-meta">
+          <div class="profile-meta-item">📍 Shah Alam, Malaysia</div>
+          <div class="profile-meta-item">🎓 UiTM · CSP650</div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat"><strong id="prof-following">6</strong> <span>Following</span></div>
+          <div class="profile-stat"><strong id="prof-followers">128</strong> <span>Followers</span></div>
+        </div>
+      </div>
+      <div class="profile-tabs">
+        <div class="ptab active" onclick="setProfileTab(this,'posts')">Posts</div>
+        <div class="ptab" onclick="setProfileTab(this,'replies')">Replies</div>
+        <div class="ptab" onclick="setProfileTab(this,'media')">Media</div>
+        <div class="ptab" onclick="setProfileTab(this,'likes')">Likes</div>
+      </div>
+      <div id="profile-posts-list"></div>
+      <div id="profile-other-tab" style="display:none;">
+        <div class="empty-page">
+          <div class="big-icon">📭</div>
+          <div class="page-h1">Nothing here yet</div>
+          <div class="page-p" style="margin:0 auto;">This section will show your activity when you have some.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- ═══ RIGHT SIDEBAR ═══ -->
+  <div class="rsidebar">
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><path d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.814 5.272l4.521 4.521-.707.707-4.521-4.521c-1.457 1.132-3.286 1.814-5.272 1.814-4.695 0-8.5-3.806-8.5-8.5z"/></svg>
+        <input class="search-input" placeholder="Search CyberShield"/>
+      </div>
+    </div>
+    <div class="widget">
+      <div class="widget-title">Trends for you</div>
+      <div class="witem"><div class="witem-cat">Trending · Technology</div><div class="witem-val">#CyberSafety</div><div class="witem-sub">12.4K posts</div></div>
+      <div class="witem"><div class="witem-cat">Trending · AI</div><div class="witem-val">#DeepLearning</div><div class="witem-sub">8.1K posts</div></div>
+      <div class="witem"><div class="witem-cat">Trending · Education</div><div class="witem-val">#OnlineSafety</div><div class="witem-sub">5.3K posts</div></div>
+      <div class="witem"><div class="witem-cat">Trending · Tech</div><div class="witem-val">#BiLSTM</div><div class="witem-sub">3.7K posts</div></div>
+    </div>
+    <div class="widget">
+      <div class="widget-title">Who to follow</div>
+      <div class="follow-item"><div class="avatar av-a">AM</div><div style="flex:1;"><div style="font-weight:700;font-size:15px;">Alex M.</div><div style="font-size:14px;color:var(--muted);">@alexm</div></div><button class="follow-btn" onclick="followUser(this,'Alex M.')">Follow</button></div>
+      <div class="follow-item"><div class="avatar av-b">PR</div><div style="flex:1;"><div style="font-weight:700;font-size:15px;">Priya R.</div><div style="font-size:14px;color:var(--muted);">@priyar</div></div><button class="follow-btn" onclick="followUser(this,'Priya R.')">Follow</button></div>
+      <div class="follow-item"><div class="avatar av-c">JK</div><div style="flex:1;"><div style="font-weight:700;font-size:15px;">Jordan K.</div><div style="font-size:14px;color:var(--muted);">@jordank</div></div><button class="follow-btn" onclick="followUser(this,'Jordan K.')">Follow</button></div>
+    </div>
+    <div class="footer-links">Terms · Privacy · Cookies · Ads info · More ···<br>© 2025 CyberShield</div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- ═══ DEVELOPER PANEL (Ctrl+Shift+D) ═══ -->
+<div class="dev-panel" id="devPanel">
+  <div class="dev-header">
+    <div class="dev-title">⚙ Developer Panel</div>
+    <button class="dev-close" onclick="toggleDev()">✕</button>
+  </div>
+
+  <div class="dev-section">
+    <div class="dev-label">API Status</div>
+    <div class="dev-status">
+      <div class="dev-dot" id="devDot"></div>
+      <div class="dev-text" id="devStatus">No endpoint connected</div>
+    </div>
+    <div class="dev-label" style="margin-top:10px;">ngrok / Backend URL</div>
+    <input class="dev-input" id="devApiUrl" type="text" placeholder="https://xxxx-xx-xxx.ngrok-free.app/predict" oninput="updateDevUrl()"/>
+    <button class="dev-btn" onclick="testConnection()">Test Connection</button>
+    <button class="dev-btn secondary" onclick="clearEndpoint()">Clear Endpoint</button>
+  </div>
+
+  <div class="dev-section">
+    <div class="dev-label">Detection Statistics</div>
+    <div class="dev-stat-row"><div class="dev-stat-key">Posts submitted</div><div class="dev-stat-val" id="dev-total">0</div></div>
+    <div class="dev-stat-row"><div class="dev-stat-key">Approved (safe)</div><div class="dev-stat-val green" id="dev-safe">0</div></div>
+    <div class="dev-stat-row"><div class="dev-stat-key">Blocked</div><div class="dev-stat-val red" id="dev-blocked">0</div></div>
+    <div class="dev-stat-row"><div class="dev-stat-key">Block rate</div><div class="dev-stat-val yellow" id="dev-rate">—</div></div>
+    <div class="dev-stat-row"><div class="dev-stat-key">Avg confidence</div><div class="dev-stat-val" id="dev-conf">—</div></div>
+    <div class="dev-stat-row"><div class="dev-stat-key">API mode</div><div class="dev-stat-val" id="dev-mode">Offline</div></div>
+  </div>
+
+  <div class="dev-section">
+    <div class="dev-label">Activity Log</div>
+    <div class="dev-log" id="devLog"><span class="log-info">Panel opened. Waiting for activity…</span></div>
+  </div>
+
+  <div class="dev-section">
+    <div class="dev-label">Quick Test</div>
+    <input class="dev-input" id="devTestInput" type="text" placeholder='Type text to test e.g. "you are stupid"'/>
+    <button class="dev-btn" onclick="quickTest()">Run Detection Test</button>
+  </div>
+
+  <div class="dev-hint">Press Ctrl+Shift+D to toggle this panel</div>
+</div>
+
+<div class="dev-toggle-hint">Press Ctrl+Shift+D for developer panel</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+const DEFAULT_API_ENDPOINT = 'http://127.0.0.1:8000/predict';
+let apiEndpoint = DEFAULT_API_ENDPOINT;
+let stats = { total:0, safe:0, blocked:0, confSum:0, confCount:0 };
+let myPosts = [];
+let followedUsers = [];
+let notifications = [];
+let currentView = 'home';
+let currentFeedTab = 'foryou';
+let devOpen = false;
+
+const CYBERBULLY_KEYWORDS = [
+  'stupid',
+  'idiot',
+  'dumb',
+  'loser',
+  'moron',
+  'pathetic',
+  'worthless',
+  'ugly',
+  'kill yourself',
+  'go die',
+  'nobody likes you',
+  'everyone hates you',
+  'shut up',
+  'trash',
+  'disgusting',
+  'freak',
+  'what the fuck',
+  'fuck you',
+  'bitch',
+  'asshole',
+  'fuck',
+  'bad',
+  'fat'
+];
+
+const USERS = [
+  {name:'Alex M.',     handle:'@alexm',   initials:'AM', av:'av-a', bio:'Software engineer · AI enthusiast'},
+  {name:'Priya R.',    handle:'@priyar',  initials:'PR', av:'av-b', bio:'Data scientist · Love NLP'},
+  {name:'Jordan K.',   handle:'@jordank', initials:'JK', av:'av-c', bio:'Researcher · Online safety advocate'},
+  {name:'Sam L.',      handle:'@saml',    initials:'SL', av:'av-d', bio:'Product designer · UX & accessibility'},
+  {name:'Nadia H.',   handle:'@nadiah',  initials:'NH', av:'av-e', bio:'AI researcher · Bias & fairness'},
+  {name:'Amir F.',    handle:'@amirf',   initials:'AF', av:'av-f', bio:'Full-stack dev · Building safe spaces'},
+];
+
+const TRENDS_DATA = [
+  {cat:'Trending · Technology', tag:'#CyberSafety',   count:'12.4K posts', tab:'trending'},
+  {cat:'Trending · AI',         tag:'#DeepLearning',  count:'8.1K posts',  tab:'trending'},
+  {cat:'Trending · Education',  tag:'#OnlineSafety',  count:'5.3K posts',  tab:'trending'},
+  {cat:'Trending · Tech',       tag:'#BiLSTM',        count:'3.7K posts',  tab:'trending'},
+  {cat:'Trending · Tech',       tag:'#NLP',           count:'2.9K posts',  tab:'trending'},
+  {cat:'News · Malaysia',       tag:'#DigitalSafety', count:'1.8K posts',  tab:'news'},
+  {cat:'News · World',          tag:'#TechNews',      count:'4.2K posts',  tab:'news'},
+  {cat:'Sports · Esports',      tag:'#SafeGaming',    count:'900 posts',   tab:'sports'},
+  {cat:'Entertainment',         tag:'#SocialMedia',   count:'6.1K posts',  tab:'entertainment'},
+];
+
+const NOTIF_SEED = [
+  {icon:'💙', cls:'notif-blue',   text:'<strong>Alex M.</strong> liked your post "Just finished my deep learning project!"', time:'2m'},
+  {icon:'🔁', cls:'notif-green',  text:'<strong>Priya R.</strong> reposted your post', time:'8m'},
+  {icon:'💬', cls:'notif-blue',   text:'<strong>Jordan K.</strong> replied: "Great work on the cyberbullying detection!"', time:'15m'},
+  {icon:'👤', cls:'notif-blue',   text:'<strong>Sam L.</strong> followed you', time:'32m'},
+  {icon:'🛡', cls:'notif-yellow', text:'CyberShield blocked a harmful post before it reached your feed', time:'1h'},
+  {icon:'❤️', cls:'notif-red',   text:'<strong>Nadia H.</strong> and 4 others liked your post', time:'2h'},
+];
+
+const MSG_SEED = [
+  {user:USERS[0], preview:'Hey! Great work on your FYP presentation 🎉', time:'2m',  unread:true},
+  {user:USERS[1], preview:'Can you share the BiLSTM training code?',      time:'14m', unread:true},
+  {user:USERS[2], preview:'The detection accuracy looks really good!',    time:'1h',  unread:false},
+  {user:USERS[3], preview:'Let\'s collaborate on the UI improvements',    time:'3h',  unread:false},
+];
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const ni = document.getElementById('nav-' + name);
+  if (ni) ni.classList.add('active');
+  currentView = name;
+  if (name === 'explore') renderTrends('trending');
+  if (name === 'notifications') renderNotifications();
+  if (name === 'messages') renderMessages();
+  if (name === 'profile') renderProfilePosts();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HOME — TABS
+// ═══════════════════════════════════════════════════════════
+function switchFeedTab(tab) {
+  currentFeedTab = tab;
+  document.getElementById('tab-foryou').classList.toggle('active', tab === 'foryou');
+  document.getElementById('tab-following').classList.toggle('active', tab === 'following');
+  document.getElementById('feed-foryou').style.display = tab === 'foryou' ? 'block' : 'none';
+  document.getElementById('feed-following').style.display = tab === 'following' ? 'block' : 'none';
+  if (tab === 'following') renderFollowingFeed();
+}
+
+function renderFollowingFeed() {
+  const container = document.getElementById('following-posts');
+  if (followedUsers.length === 0) {
+    container.innerHTML = `<div class="empty-page"><div class="big-icon">👥</div><div class="page-h1">Follow people you know</div><div class="page-p" style="margin:0 auto;">When you follow someone, their posts will show up here.</div></div>`;
+    return;
+  }
+  const followingPosts = USERS
+    .filter(u => followedUsers.includes(u.name))
+    .map(u => ({
+      text: generateUserPost(u),
+      user: u,
+      time: Math.floor(Math.random()*55+5)+'m'
+    }));
+  container.innerHTML = '';
+  followingPosts.forEach(p => {
+    const card = makeSafeCard(p.text, p.user);
+    card.querySelector('.post-time').textContent = p.time;
+    container.appendChild(card);
+  });
+}
+
+function generateUserPost(user) {
+  const posts = {
+    'Alex M.': 'Just deployed a new safety feature. Loving how AI can help keep communities safer 🚀',
+    'Priya R.': 'Fine-tuning an NLP model for content moderation — the results are looking great!',
+    'Jordan K.': 'Published a new paper on cyberbullying detection metrics. Link in bio! 📄',
+    'Sam L.': 'Redesigned the moderation dashboard today. UX really matters in safety tools.',
+    'Nadia H.': 'Presented bias reduction techniques at the AI safety workshop. Great turnout!',
+    'Amir F.': 'New PR merged — improved recall on cyberbullying class by 4%. Small wins matter 💪',
+  };
+  return posts[user.name] || `Excited about new developments in AI safety and content moderation!`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMPOSE
+// ═══════════════════════════════════════════════════════════
+function onCompose() {
+  const v = document.getElementById('ci').value;
+  const l = v.trim().length;
+  const pct = l / 280;
+  const rc = document.getElementById('rc');
+  rc.style.strokeDashoffset = 62.83 - pct * 62.83;
+  rc.style.stroke = pct > .9 ? '#f4212e' : pct > .8 ? '#ffd400' : '#1d9bf0';
+  document.getElementById('pb').disabled = l === 0;
+}
+
+function onComposeFollowing(el) {
+  document.getElementById('pb-following').disabled = el.value.trim().length === 0;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SUBMIT (For You feed — with detection)
+// ═══════════════════════════════════════════════════════════
+function containsCyberbullyKeyword(text) {
+  if (!text || !text.trim()) return false;
+  const normalizedText = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!normalizedText) return false;
+  return CYBERBULLY_KEYWORDS.some(keyword => {
+    const normalizedKeyword = keyword.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!normalizedKeyword) return false;
+    return normalizedText.includes(normalizedKeyword);
+  });
+}
+
+async function submitPost() {
+  const box = document.getElementById('ci');
+  const text = box.value.trim();
+  if (!text) return;
+  const btn = document.getElementById('pb');
+  btn.disabled = true; btn.classList.add('loading');
+  stats.total++;
+  let result;
+  const keywordMatch = containsCyberbullyKeyword(text);
+  if (keywordMatch) {
+    result = { label: 'Cyberbullying', confidence: 1, error: false };
+  } else {
+    result = await callAPI(text);
+  }
+  const harm = keywordMatch || isHarmful(result.label);
+  if (harm) {
+    stats.blocked++;
+    devLog(`BLOCKED [${Math.round((result.confidence || 0) * 100)}%] "${text.slice(0,40)}…"`, 'err');
+    showToast(`🚫 Your post was blocked — ${result.label} (${Math.round((result.confidence || 0) * 100)}% confidence)`);
+    const card = makeBlockedCard(text, {name:'You',handle:'@syamimiadlina',initials:'SA',av:'av-you'}, result);
+    prependPost('foryou-posts', card);
+    pushNotification(`🛡 CyberShield blocked your post — detected as "${result.label}" with ${Math.round((result.confidence || 0) * 100)}% confidence`, 'notif-yellow', '🛡');
+  } else {
+    stats.safe++;
+    if (!result.error) {
+      stats.confSum += result.confidence || 0;
+      stats.confCount++;
+    }
+    devLog(`APPROVED [${Math.round((result.confidence || 0) * 100)}%] "${text.slice(0,40)}"`, 'ok');
+    const card = makeSafeCard(text, {name:'You',handle:'@syamimiadlina',initials:'SA',av:'av-you'}, null, result.confidence);
+    prependPost('foryou-posts', card);
+    myPosts.unshift({text, card});
+    updateProfilePostCount();
+    if (result.error) {
+      showToast('⚠️ Moderation service unavailable. Your post was published without filtering.');
+    } else {
+      showToast(`✅ Post published — confidence ${Math.round((result.confidence || 0) * 100)}%`);
+    }
+  }
+  updateDevStats();
+  btn.disabled = false; btn.classList.remove('loading');
+  box.value = ''; onCompose();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SUBMIT (Following tab — no detection, trusted network)
+// ═══════════════════════════════════════════════════════════
+function submitFollowingPost() {
+  const box = document.getElementById('ci-following');
+  const text = box.value.trim();
+  if (!text) return;
+  const card = makeSafeCard(text, {name:'You',handle:'@syamimiadlina',initials:'SA',av:'av-you'});
+  prependPost('following-posts', card);
+  myPosts.unshift({text, card});
+  updateProfilePostCount();
+  box.value = '';
+  document.getElementById('pb-following').disabled = true;
+  showToast('Post shared with your followers!');
+}
+
+function prependPost(containerId, card) {
+  const container = document.getElementById(containerId);
+  const empty = container.querySelector('.empty-page');
+  if (empty) empty.remove();
+  container.insertBefore(card, container.firstChild);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DETECTION API
+// ═══════════════════════════════════════════════════════════
+function normalizeApiEndpoint(value) {
+  const trimmed = (value || '').trim();
+  if (!trimmed) return null;
+  return trimmed.endsWith('/predict') ? trimmed : `${trimmed.replace(/\/$/, '')}/predict`;
+}
+
+async function callAPI(text) {
+  const endpoint = normalizeApiEndpoint(apiEndpoint) || DEFAULT_API_ENDPOINT;
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const d = await res.json();
+    const label = typeof d.label === 'string' ? d.label : 'Not Cyberbullying';
+    const confidence = parseFloat(d.confidence) || 0;
+    devLog(`API OK → label="${label}" conf=${confidence}`, 'ok');
+    return { label, confidence, error: false };
+  } catch (e) {
+    devLog(`API ERROR: ${e.message}`, 'err');
+    return { label: 'Not Cyberbullying', confidence: 0, error: true };
+  }
+}
+
+function isHarmful(label) {
+    if (!label) return false;
+
+    const l = label.trim().toLowerCase();
+
+    return (
+        l === "cyberbullying" ||
+        l === "toxic" ||
+        l === "hate" ||
+        l === "offensive" ||
+        l === "1"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CARD BUILDERS
+// ═══════════════════════════════════════════════════════════
+function makeSafeCard(text, user, timeStr, confidence = null) {
+  const wrap = document.createElement('div');
+  wrap.className = 'post-wrap';
+  const t = timeStr || new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  const confidenceHtml = confidence !== null ? `<div style="margin-top:8px;font-size:12px;color:var(--muted);">Confidence: ${Math.round(confidence * 100)}%</div>` : '';
+  wrap.innerHTML = `
+  <div class="post-inner">
+    <div class="avatar ${user.av}">${user.initials}</div>
+    <div class="post-body-col">
+      <div class="post-header-row">
+        <span class="post-name">${user.name}</span>
+        <span class="post-handle">${user.handle}</span>
+        <span class="post-dot">·</span>
+        <span class="post-time">${t}</span>
+        <div class="post-more">···</div>
+      </div>
+      <div class="post-text">${esc(text)}</div>
+      ${confidenceHtml}
+      <div class="post-actions">
+        <button class="paction" onclick="showToast('Reply coming soon')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.501 3.58 7.501 8 0 4.42-3.011 8-7.501 8h-4.366c-.583 0-1.508-.048-2.39-.32l-4.266 1.322c-.614.19-1.224-.26-1.21-.903l.093-3.96C2.017 12.773 1.751 11.45 1.751 10z"/></svg>
+          <span>0</span>
+        </button>
+        <button class="paction repost-btn" onclick="handleRepost(this,'${esc(text)}','${user.name}')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg>
+          <span class="rp-count">0</span>
+        </button>
+        <button class="paction like" onclick="toggleLike(this)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg>
+          <span class="lc">0</span>
+        </button>
+        <button class="paction" onclick="showToast('Bookmarked!')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>`;
+  return wrap;
+}
+
+function makeBlockedCard(text, user, result) {
+  const wrap = document.createElement('div');
+  wrap.className = 'post-wrap';
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  const conf = Math.round((result.confidence||.9)*100);
+  wrap.innerHTML = `
+  <div class="post-inner">
+    <div class="avatar ${user.av}">${user.initials}</div>
+    <div class="post-body-col">
+      <div class="post-header-row">
+        <span class="post-name">${user.name}</span>
+        <span class="post-handle">${user.handle}</span>
+        <span class="post-dot">·</span>
+        <span class="post-time">${t}</span>
+        <div class="post-more">···</div>
+      </div>
+      <div class="post-text blurred">${esc(text)}</div>
+      <div class="blocked-card">
+        <div class="blocked-inner">
+          <div class="blocked-title">🚫 Post withheld by CyberShield</div>
+          <div class="blocked-desc">This post was identified as potentially harmful and was not published to protect other users.</div>
+          <div class="blocked-meta">
+            <div class="blocked-stat"><strong>Label:</strong> ${result.label}</div>
+            <div class="blocked-stat"><strong>Confidence:</strong> ${conf}%</div>
+            <div class="blocked-stat"><strong>Source:</strong> ${result.source || 'AI Prediction'}</div>
+            <div class="blocked-stat"><strong>Action:</strong> Post withheld</div>
+          </div>
+          <button class="btn-reveal" onclick="toggleReveal(this)">Reveal content (reviewer only)</button>
+        </div>
+      </div>
+      <div class="post-actions">
+        <button class="paction disabled-action"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.501 3.58 7.501 8 0 4.42-3.011 8-7.501 8h-4.366c-.583 0-1.508-.048-2.39-.32l-4.266 1.322c-.614.19-1.224-.26-1.21-.903l.093-3.96C2.017 12.773 1.751 11.45 1.751 10z"/></svg><span>0</span></button>
+        <button class="paction disabled-action"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg><span>0</span></button>
+        <button class="paction like disabled-action"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg><span>0</span></button>
+        <button class="paction disabled-action"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"/></svg></button>
+      </div>
+    </div>
+  </div>`;
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  POST INTERACTIONS
+// ═══════════════════════════════════════════════════════════
+function toggleLike(btn) {
+  btn.classList.toggle('liked');
+  const lc = btn.querySelector('.lc');
+  lc.textContent = btn.classList.contains('liked') ? '1' : '0';
+}
+
+function handleRepost(btn, text, userName) {
+  const count = btn.querySelector('.rp-count');
+  if (count.textContent === '0') {
+    count.textContent = '1';
+    btn.style.color = '#00ba7c';
+    const repostCard = makeSafeCard(`🔁 Reposted from ${userName}: "${text}"`, {name:'You',handle:'@syamimiadlina',initials:'SA',av:'av-you'});
+    prependPost('foryou-posts', repostCard);
+    showToast('Reposted!');
+  } else {
+    count.textContent = '0';
+    btn.style.color = '';
+    showToast('Repost removed');
+  }
+}
+
+function toggleReveal(btn) {
+  const pt = btn.closest('.post-body-col').querySelector('.post-text');
+  pt.classList.toggle('blurred');
+  btn.textContent = pt.classList.contains('blurred') ? 'Reveal content (reviewer only)' : 'Hide content';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXPLORE
+// ═══════════════════════════════════════════════════════════
+let currentExploreTab = 'trending';
+function setExploreTab(el, tab) {
+  document.querySelectorAll('.explore-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentExploreTab = tab;
+  renderTrends(tab);
+}
+function renderTrends(tab) {
+  const q = document.getElementById('exploreSearch')?.value?.toLowerCase() || '';
+  const list = document.getElementById('trends-list');
+  list.innerHTML = '';
+  TRENDS_DATA.filter(t => t.tab === tab && (t.tag.toLowerCase().includes(q) || !q))
+    .forEach(t => {
+      const d = document.createElement('div');
+      d.className = 'trend-card';
+      d.innerHTML = `<div class="witem-cat">${t.cat}</div><div class="trend-pill">${t.tag}</div><div class="trend-count">${t.count}</div>`;
+      d.onclick = () => { document.getElementById('exploreSearch').value = t.tag; showToast(`Searching ${t.tag}`); };
+      list.appendChild(d);
+    });
+  if (!list.children.length) {
+    list.innerHTML = `<div class="empty-page"><div class="big-icon">🔍</div><div class="page-h1">No results</div><div class="page-p" style="margin:0 auto;">Try a different search term.</div></div>`;
+  }
+}
+function filterTrends(q) { renderTrends(currentExploreTab); }
+
+// ═══════════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+function pushNotification(text, cls, icon) {
+  notifications.unshift({text, cls, icon, time:'now'});
+  if (currentView === 'notifications') renderNotifications();
+}
+function renderNotifications() {
+  const list = document.getElementById('notif-list');
+  list.innerHTML = '';
+  const all = [...notifications, ...NOTIF_SEED];
+  all.forEach(n => {
+    const d = document.createElement('div');
+    d.className = 'notif-item';
+    d.innerHTML = `<div class="notif-icon ${n.cls}">${n.icon}</div><div><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div>`;
+    list.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MESSAGES
+// ═══════════════════════════════════════════════════════════
+function renderMessages() {
+  const list = document.getElementById('msg-list');
+  list.innerHTML = '';
+  MSG_SEED.forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'msg-list-item';
+    d.innerHTML = `
+      <div class="avatar ${m.user.av}">${m.user.initials}</div>
+      <div class="msg-preview">
+        <div class="msg-name-row">
+          <div class="msg-name">${m.user.name}</div>
+          <div class="msg-ts">${m.time}</div>
+        </div>
+        <div class="msg-preview-text">${m.preview}</div>
+      </div>
+      ${m.unread ? '<div class="msg-unread"></div>' : ''}`;
+    d.onclick = () => openMessage(m.user);
+    list.appendChild(d);
+  });
+}
+function openMessage(user) {
+  showToast(`Opening conversation with ${user.name}…`);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PROFILE
+// ═══════════════════════════════════════════════════════════
+function updateProfilePostCount() {
+  const cnt = myPosts.length;
+  document.getElementById('profile-post-count').textContent = `${cnt} post${cnt !== 1 ? 's' : ''}`;
+}
+function renderProfilePosts() {
+  const list = document.getElementById('profile-posts-list');
+  list.innerHTML = '';
+  if (myPosts.length === 0) {
+    list.innerHTML = `<div class="empty-page"><div class="big-icon">✍️</div><div class="page-h1">No posts yet</div><div class="page-p" style="margin:0 auto;">When you post, it will show up here.</div></div>`;
+    return;
+  }
+  myPosts.forEach(p => {
+    const card = makeSafeCard(p.text, {name:'You',handle:'@syamimiadlina',initials:'SA',av:'av-you'});
+    list.appendChild(card);
+  });
+}
+function setProfileTab(el, tab) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('profile-posts-list').style.display = tab === 'posts' ? 'block' : 'none';
+  document.getElementById('profile-other-tab').style.display = tab !== 'posts' ? 'block' : 'none';
+  if (tab === 'posts') renderProfilePosts();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FOLLOW
+// ═══════════════════════════════════════════════════════════
+function followUser(btn, name) {
+  if (btn.textContent === 'Follow') {
+    btn.textContent = 'Following';
+    btn.style.background = 'var(--text)';
+    btn.style.color = 'var(--bg)';
+    if (!followedUsers.includes(name)) followedUsers.push(name);
+    const fc = parseInt(document.getElementById('prof-following').textContent);
+    document.getElementById('prof-following').textContent = fc + 1;
+    pushNotification(`You are now following <strong>${name}</strong>`, 'notif-blue', '👤');
+    showToast(`Following ${name}`);
+  } else {
+    btn.textContent = 'Follow';
+    btn.style.background = '';
+    btn.style.color = '';
+    followedUsers = followedUsers.filter(u => u !== name);
+    const fc = parseInt(document.getElementById('prof-following').textContent);
+    document.getElementById('prof-following').textContent = Math.max(0, fc - 1);
+    showToast(`Unfollowed ${name}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DEVELOPER PANEL
+// ═══════════════════════════════════════════════════════════
+function toggleDev() {
+  devOpen = !devOpen;
+  document.getElementById('devPanel').classList.toggle('open', devOpen);
+  if (devOpen) updateDevStats();
+}
+
+function updateDevUrl() {
+  const v = document.getElementById('devApiUrl').value.trim();
+  apiEndpoint = normalizeApiEndpoint(v) || DEFAULT_API_ENDPOINT;
+  const dot = document.getElementById('devDot');
+  const status = document.getElementById('devStatus');
+  if (v) {
+    dot.className = 'dev-dot yellow';
+    status.textContent = 'Endpoint set (not yet tested)';
+    document.getElementById('dev-mode').textContent = 'API';
+  } else {
+    dot.className = 'dev-dot';
+    status.textContent = 'No endpoint connected';
+    document.getElementById('dev-mode').textContent = 'Offline';
+  }
+}
+
+async function testConnection() {
+  const v = document.getElementById('devApiUrl').value.trim();
+  if (!v) { devLog('No URL entered', 'warn'); return; }
+  const normalized = normalizeApiEndpoint(v) || DEFAULT_API_ENDPOINT;
+  apiEndpoint = normalized;
+  devLog(`Testing connection to ${normalized} …`, 'info');
+  try {
+    const res = await fetch(normalized.replace(/\/predict$/, '/'), { method: 'GET' });
+    if (res.ok) {
+      document.getElementById('devDot').className = 'dev-dot on';
+      document.getElementById('devStatus').textContent = 'Connected ✓';
+      document.getElementById('dev-mode').textContent = 'API Live';
+      devLog('Connection successful ✓', 'ok');
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (e) {
+    try {
+      const res2 = await fetch(normalized, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text:'test'}) });
+      if (res2.ok) {
+        document.getElementById('devDot').className = 'dev-dot on';
+        document.getElementById('devStatus').textContent = 'Connected ✓';
+        document.getElementById('dev-mode').textContent = 'API Live';
+        devLog('POST /predict endpoint reachable ✓', 'ok');
+      } else throw new Error(`HTTP ${res2.status}`);
+    } catch (e2) {
+      document.getElementById('devDot').className = 'dev-dot err';
+      document.getElementById('devStatus').textContent = `Error: ${e2.message}`;
+      devLog(`Connection failed: ${e2.message}`, 'err');
+    }
+  }
+}
+
+function clearEndpoint() {
+  apiEndpoint = DEFAULT_API_ENDPOINT;
+  document.getElementById('devApiUrl').value = DEFAULT_API_ENDPOINT;
+  document.getElementById('devDot').className = 'dev-dot';
+  document.getElementById('devStatus').textContent = 'No endpoint connected';
+  document.getElementById('dev-mode').textContent = 'Offline';
+  devLog('Endpoint cleared', 'warn');
+}
+
+function updateDevStats() {
+  document.getElementById('dev-total').textContent = stats.total;
+  document.getElementById('dev-safe').textContent = stats.safe;
+  document.getElementById('dev-blocked').textContent = stats.blocked;
+  document.getElementById('dev-rate').textContent = stats.total ? Math.round((stats.blocked/stats.total)*100)+'%' : '—';
+  document.getElementById('dev-conf').textContent = stats.confCount ? Math.round((stats.confSum/stats.confCount)*100)+'%' : '—';
+}
+
+function devLog(msg, type = 'info') {
+  const log = document.getElementById('devLog');
+  const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const line = document.createElement('div');
+  line.className = `log-${type}`;
+  line.textContent = `[${ts}] ${msg}`;
+  log.insertBefore(line, log.firstChild);
+  if (log.children.length > 50) log.removeChild(log.lastChild);
+}
+
+async function quickTest() {
+  const text = document.getElementById('devTestInput').value.trim();
+  if (!text) { devLog('Enter text in the quick test box', 'warn'); return; }
+  devLog(`Quick test: "${text.slice(0,40)}"`, 'info');
+  const result = await callAPI(text);
+  devLog(`Result → label="${result.label}" confidence=${Math.round(result.confidence*100)}%`, isHarmful(result.label) ? 'err' : 'ok');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SEED FEED
+// ═══════════════════════════════════════════════════════════
+(function seed() {
+  const devInput = document.getElementById('devApiUrl');
+  if (devInput && !devInput.value) {
+    devInput.value = DEFAULT_API_ENDPOINT;
+    updateDevUrl();
+  }
+  const seeds = [
+    {text:"Just finished my deep learning FYP — cyberbullying detection using BiLSTM! 🎉 So happy with the results.",              user:USERS[0], mins:12},
+    {text:"Reminder to always be kind online. Words have real impact on real people 💙 #OnlineSafety",                             user:USERS[1], mins:24},
+    {text:"Anyone joining the AI & Ethics workshop tomorrow? Would love to see more people there! #AI #Safety",                    user:USERS[2], mins:37},
+    {text:"Working on a new content moderation tool. The challenge of balancing accuracy with fairness is real 🤔",                user:USERS[3], mins:58},
+    {text:"New dataset just dropped for hate speech detection — multilingual support finally! This is a big deal for NLP research", user:USERS[4], mins:92},
+  ];
+  const container = document.getElementById('foryou-posts');
+  seeds.forEach(s => {
+    const card = makeSafeCard(s.text, s.user);
+    card.querySelector('.post-time').textContent = s.mins + 'm';
+    container.appendChild(card);
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Ctrl+Enter to post, Ctrl+Shift+D for dev panel
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key === 'D') { e.preventDefault(); toggleDev(); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='Enter') {
+    if (currentView === 'home' && currentFeedTab === 'foryou') submitPost();
+    if (currentView === 'home' && currentFeedTab === 'following') submitFollowingPost();
+  }
+});
+
+const devInput = document.getElementById('devApiUrl');
+if (devInput && !devInput.value) {
+  devInput.value = DEFAULT_API_ENDPOINT;
+  updateDevUrl();
+}
+</script>
+</body>
+</html>
